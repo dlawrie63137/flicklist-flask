@@ -1,6 +1,20 @@
 {% extends "base.html" %}
 
 {% block content %}
+<p>
+    
+    {% if watchlist == [] %}
+            <p>No movies yet.</p>
+    {% else %}
+        <h2>My Watchlist</h2>
+            <ul>
+                {% for movie in watchlist %}
+                <li>{{movie}}</li>
+                {% endfor %}
+            </ul>
+    {% endif %}
+</p>
+
 <h2>Edit My Watchlist</h2>
 
 <form action="/add" method="post">
