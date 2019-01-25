@@ -42,6 +42,7 @@ crossoff_options = ""
 for movie in get_current_watchlist():
     crossoff_options += '<option value="{0}">{0}</option>'.format(movie)
 
+
 crossoff_form = """
     <form action="/crossoff" method="post">
         <label>
@@ -69,7 +70,7 @@ terrible_movies = [
 def crossoff_movie():
     crossed_off_movie = request.form['crossed-off-movie']
 
-    if crossed_off_movie not in get_current_watchlist():
+    if crossed_off_movie not in crossed_off_movie:
         # the user tried to cross off a movie that isn't in their list,
         # so we redirect back to the front page and tell them what went wrong
         error = "'{0}' is not in your Watchlist, so you can't cross it off!".format(crossed_off_movie)
@@ -95,15 +96,23 @@ def add_movie():
     # TODO 
     # if the user typed nothing at all, redirect and tell them the error
     if new_movie == '':
-        redirect('/add')
-        return '<h2>You have not entered anything!</h2>'
+        error = "You have not entered anything!"
+
+        # redirect to homepage, and include error as a query parameter in the URL
+        return redirect("/?error=" + error)
+
         
     # TODO 
     # if the user wants to add a terrible movie, redirect and tell them not to add it b/c it sucks
     for movie in terrible_movies:
         if movie == request.form['new-movie']:
-            redirect('/add')
-            return '<h2>"You do not want to watch {}, it sucks!"</h2>'.format(movie)
+           error = "You do NOT want to watch {0}, it SUCKS!".format(movie)
+
+        # redirect to homepage, and include error as a query parameter in the URL
+        return redirect("/?error=" + error)
+
+            #redirect('/add')
+            #return '<h2>"You do not want to watch {}, it sucks!"</h2>'.format(movie)
     # build response content
     new_movie_element = "<strong>" + new_movie + "</strong>"
     sentence = new_movie_element + " has been added to your Watchlist!"
