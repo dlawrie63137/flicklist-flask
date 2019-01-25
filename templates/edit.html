@@ -2,17 +2,37 @@
 
 {% block content %}
 <p>
-    
-    {% if watchlist == [] %}
-            <p>No movies yet.</p>
+    <!---- Change get_current_watchlist to return []. This simulates a user with an empty watchlist.
+    # Modify edit.html to make sense in such a situation:
+    #  First: Hide the <h2>My Watchlist</h2> and it's unordered list.
+    #  Second: Hide the crossoff form, since there are no movies to cross off. 
+    # Then you can change get_current_watchlist back to the list of hard-coded movies.
+    {% if watchlist == [] %} -->
+
+        <p>No movies yet.</p>
+
+        <h2>Edit My Watchlist</h2>
+
+        <form action="/add" method="post">
+            <label>
+                I want to add
+                <input type="text" name="new-movie"/>
+                to my watchlist.
+            </label>
+            <input type="submit" value="Add It"/>
+        </form>
+
     {% else %}
-        <h2>My Watchlist</h2>
+    <!---- Modify the edit.html file to display the watchlist in an unordered list with bullets in front of each movie.
+     # Put the list between "Flicklist" and "Edit My Watchlist" under this heading: <h2>My Watchlist</h2>
+    -->            
+         <h2>My Watchlist</h2>
             <ul>
                 {% for movie in watchlist %}
                 <li>{{movie}}</li>
                 {% endfor %}
             </ul>
-    {% endif %}
+
 </p>
 
 <h2>Edit My Watchlist</h2>
@@ -42,6 +62,7 @@
     <input type="submit" value="Cross It Off"/>
 </form>
 
+    {% endif %}
 {% if error %}
   <p class='error'>{{ error }}</p>
 {% endif %}

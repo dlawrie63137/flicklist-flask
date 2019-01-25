@@ -47,7 +47,7 @@ def add_movie():
 
     # if the user wants to add a terrible movie, redirect and tell them the error
     if new_movie in terrible_movies:
-        error = "Trust me, you don't want to add '{0}' to your Watchlist".format(new_movie)
+        error = "Trust me, you don't want to add '{0}' to your Watchlist.".format(new_movie)
         return redirect("/?error=" + error)
 
     # 'escape' the user's input so that if they typed HTML, it doesn't mess up our site
@@ -57,17 +57,6 @@ def add_movie():
     # Create a template called add-confirmation.html inside your /templates directory
     # Use that template to render the confirmation message instead of this temporary message below
     return render_template('add-confirmation.html', new_movie=new_movie)
-
-# TODO:
-# Modify the edit.html file to display the watchlist in an unordered list with bullets in front of each movie.
-# Put the list between "Flicklist" and "Edit My Watchlist" under this heading: <h2>My Watchlist</h2>
-
-# TODO:
-# Change get_current_watchlist to return []. This simulates a user with an empty watchlist.
-# Modify edit.html to make sense in such a situation:
-#  First: Hide the <h2>My Watchlist</h2> and it's unordered list.
-#  Second: Hide the crossoff form, since there are no movies to cross off. 
-# Then you can change get_current_watchlist back to the list of hard-coded movies.
 
 @app.route("/")
 def index():
