@@ -18,14 +18,14 @@ def get_current_watchlist():
     # returns user's current watchlist--hard coded for now
     return [ "Star Wars", "Minions", "Freaky Friday", "My Favorite Martian" ]
 
-# TODO: 
+# TODO: DONE
 # Modify "My Watchlist" so that you eliminate the need for the "crossoff" form in edit.html. 
 # Now, next to every list item/movie listed in "My Watchlist" you should display a button that says "I Watched it!". 
 # Clicking the button will result in a confirmation message that the movie has been watched. 
 # So you'll need to add a form within the <li> tags of "My Watchlist"
 # Once this is done, delete the "crossoff" form in edit.html
 
-# TODO:
+# TODO: DONE
 # Make a ratings.html template which lists all movies that have been crossed off.
 # It should have a header of <h2>Movies I Have Watched</h2>
 # Add a form for rating EACH list item/movie using a <select> dropdown with the options/values
@@ -33,20 +33,31 @@ def get_current_watchlist():
 # And with a button that says "Rate It!" to submit the user's rating.
 # Give this form the action of "/rating-confirmation" and the method of post.
 
-# TODO: 
+# TODO: DONE
 # Add a function, movie_ratings, to handle a get request and render the template at "/ratings"
+@app.route("/ratings", methods=['GET'])
+def movie_ratings():
+    return render_template("ratings.html", watched=get_watched_movies())
 
-# TODO:
+# TODO: DONE
 # Add a function, get_watched_movies, to get the list of crossed off movies. 
 # For now, create a hard-coded list with a few movie titles. 
+def get_watched_movies():
+    return ['The Sting', 'Annabelle', 'Split', 'Fear', 'The Birds']
 
-# TODO:
+# TODO: DONE
 # Make a rating-confirmation.html template, to be displayed when the user rates a movie 
 # they have crossed off. 
 
-# TODO: 
+# TODO: DONE
 # create a rate_movie function that handles a post request on /rating-confirmation and 
 # renders the `rating-confirmation` template.
+@app.route("/rating-confirmation", methods=['POST'])
+def rate_movie():
+    rating=request.form['rate_movie']
+    movie=request.form['movie']
+    return render_template('rating-confirmation.html', rating=rating, movie=movie)
+
 
 @app.route("/crossoff", methods=['POST'])
 def crossoff_movie():
@@ -79,7 +90,7 @@ def add_movie():
         return redirect("/?error=" + error)
 
     # 'escape' the user's input so that if they typed HTML, it doesn't mess up our site
-    new_movie_escaped = cgi.escape(new_movie, quote=True)
+    #new_movie_escaped = cgi.escape(new_movie, quote=True)
 
     return render_template('add-confirmation.html', movie=new_movie)
 
