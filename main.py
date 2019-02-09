@@ -7,6 +7,12 @@ app.config['DEBUG'] = True      # displays runtime errors in the browser, too
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://flicklist:MyNewPass@localhost:8889/flicklist'
 app.config['SQLALCHEMY_ECHO'] = True
 
+# In a real application, this should be kept secret (i.e. not on github)
+# As a consequence of this secret being public, I think connection snoopers or
+# rival movie sites' javascript could hijack our session and act as us,
+# perhaps giving movies bad ratings - the HORROR.
+app.secret_key = 'A0Zr98j/3yX R~XHH!jmN]LWX/,?RU'
+
 db = SQLAlchemy(app)
 
 class User(db.Model):
@@ -43,33 +49,70 @@ terrible_movies = [
     "Starship Troopers"
 ]
 
+# function to rely on a list of endpoints that users can visit without being redirected.
+#         It should contain 'register' and 'login'.
+@app.before_request
+def require_login():
+    allowed_routes = ['login', 'register']
+    if request.endpoint not in allowed_routes and 'email' not in session:
+        return redirect('/login')
+
 def get_current_watchlist():
     return Movie.query.filter_by(watched=False).all()
 
 def get_watched_movies():
     return Movie.query.filter_by(watched=True).all()
 
-# TODO 3: Add "/login" GET and POST routes.
-# TODO 4: Create login template with username and password.
-#         Notice that we've already created a 'login' link in the upper-right corner of the page that'll connect to it.
+# Add "/login" GET and POST routes.
+@app.route("/login", methods=['POST', 'GET'])
+def login():
+    if request.method == 'POST':
+        email = request.form['email']
+        password = request.form['password']
+        user = User.query.filter_by(email=email).first()
+        if user and user.password == password:
+            session['email'] = email
+            flash("Logged In")
+            return redirect('/')
+        else:
+            flash('User password incorrect, or user does not exist.', 'error') 
+                
+    return render_template("login.html")
+
+# Create login template with username and password.
+# Notice that we've already created a 'login' link in the upper-right corner of the page that'll connect to it.
+
+def is_good_password(password, verify):
+    for idx in range(len(password)):
+        if password[idx] != verify[idx]:
+            return False
+    return True
 
 @app.route("/register", methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
         email = request.form['email']
         password = request.form['password']
+        verify = request.form['verify']
         if not is_email(email):
             flash('zoiks! "' + email + '" does not seem like an email address')
             return redirect('/register')
-        # TODO 1: validate that form value of 'verify' matches password
-        # TODO 2: validate that there is no user with that email already
-        user = User(email=email, password=password)
-        db.session.add(user)
-        db.session.commit()
-        session['user'] = user.email
-        return redirect("/")
-    else:
-        return render_template('register.html')
+        # validate that form value of 'verify' matches password
+        if not is_good_password(password, verify):
+            flash('Passwords do not match. Please re-enter password.')
+            return redirect('/register')
+        # validate that there is no user with that email already
+        existing_user = User.query.filter_by(email=email).first()
+
+        if not existing_user:
+            new_user = User(email, password)
+            db.session.add(new_user)
+            db.session.commit()
+            session['email'] = email
+            return redirect('/')
+        else:
+           flash('User already exists!')
+    return render_template("register.html")
 
 def is_email(string):
     # for our purposes, an email string has an '@' followed by a '.'
@@ -156,18 +199,8 @@ def index():
     encoded_error = request.args.get("error")
     return render_template('edit.html', watchlist=get_current_watchlist(), error=encoded_error and cgi.escape(encoded_error, quote=True))
 
-# TODO 5: modify this function to rely on a list of endpoints that users can visit without being redirected.
-#         It should contain 'register' and 'login'.
-@app.before_request
-def require_login():
-    if not ('user' in session or request.endpoint == 'register'):
-        return redirect("/register")
 
-# In a real application, this should be kept secret (i.e. not on github)
-# As a consequence of this secret being public, I think connection snoopers or
-# rival movie sites' javascript could hijack our session and act as us,
-# perhaps giving movies bad ratings - the HORROR.
-app.secret_key = 'A0Zr98j/3yX R~XHH!jmN]LWX/,?RU'
+
 
 if __name__ == "__main__":
     app.run()
