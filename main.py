@@ -4,6 +4,7 @@ from flask import request, redirect, render_template, session, flash
 import cgi
 from app import app, db
 from models import User, Movie
+from hashutils import *
 
 # a list of movie names that nobody should have to watch
 terrible_movies = [
@@ -30,7 +31,7 @@ def login():
         users = User.query.filter_by(email=email)
         if users.count() == 1:
             user = users.first()
-            if password == user.password:
+            if check_pw_hash(password, user.pw_hash):
                 session['user'] = user.email
                 flash('welcome back, '+user.email)
                 return redirect("/")
@@ -54,10 +55,11 @@ def register():
             flash('passwords did not match')
             return redirect('/register')
         user = User(email=email, password=password)
-        db.session.add(user)
-        db.session.commit()
-        session['user'] = user.email
-        return redirect("/")
+        if user and check_pw_hash(password, user.pw_hash):
+            db.session.add(user)
+            db.session.commit()
+            session['user'] = user.email
+            return redirect("/")
     else:
         return render_template('register.html')
 
